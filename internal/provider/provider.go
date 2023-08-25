@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"net/http"
 	"os"
 
 	"github.com/google/go-github/v53/github"
@@ -13,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/oauth2"
 )
 
 var descriptions map[string]string
@@ -161,7 +161,11 @@ func (p *githubreposProvider) Configure(ctx context.Context, req provider.Config
 	tflog.Debug(ctx, "Creating GitHub client")
 
 	// Create a new GitHub client using the configuration values
-	client, err := github.NewEnterpriseClient("https://api.github.com/", "", &http.Client{})
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	oc := oauth2.NewClient(ctx, ts)
+	client, err := github.NewEnterpriseClient("https://api.github.com/", "", oc)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create GitHub API Client",
@@ -172,10 +176,15 @@ func (p *githubreposProvider) Configure(ctx context.Context, req provider.Config
 		return
 	}
 
+	cfg := &Config{
+		Owner:  owner,
+		Client: client,
+	}
+
 	// Make the GitHub client available during DataSource and Resource
 	// type Configure methods.
-	resp.DataSourceData = client
-	resp.ResourceData = client
+	resp.DataSourceData = cfg
+	resp.ResourceData = cfg
 
 	tflog.Info(ctx, "Configured GitHub client", map[string]any{"success": true})
 }
@@ -187,5 +196,7 @@ func (p *githubreposProvider) DataSources(_ context.Context) []func() datasource
 
 // Resources defines the resources implemented in the provider.
 func (p *githubreposProvider) Resources(_ context.Context) []func() resource.Resource {
-	return nil
+	return []func() resource.Resource{
+		NewAllResource,
+	}
 }
