@@ -102,13 +102,16 @@ func (r *allResource) Metadata(_ context.Context, req resource.MetadataRequest, 
 // Schema defines the schema for the resource.
 func (r *allResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: descriptions["all_resource_schema"],
 		Attributes: map[string]schema.Attribute{
 			"repos": schema.MapNestedAttribute{
-				Required: true,
+				Description: descriptions["repos"],
+				Required:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"id": schema.Int64Attribute{
-							Computed: true,
+							Description: descriptions["repo_id"],
+							Computed:    true,
 						},
 					},
 				},

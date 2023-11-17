@@ -19,11 +19,19 @@ var descriptions map[string]string
 
 func init() {
 	descriptions = map[string]string{
+		"provider_schema": "Performs readonly operations on GitHub repositories",
+
 		"token": "The OAuth token used to connect to GitHub. Anonymous mode is enabled if both `token` and " +
 			"`app_auth` are not set.",
 
 		"owner": "The GitHub owner name to manage. " +
 			"Use this field instead of `organization` when managing individual accounts.",
+
+		"all_resource_schema": "Gets repository attributes from GitHub",
+
+		"repos": "Map of repository names and their attributes",
+
+		"repo_id": "GitHub ID for the repository",
 	}
 }
 
@@ -65,6 +73,7 @@ func (p *githubreposProvider) Metadata(_ context.Context, _ provider.MetadataReq
 func (p *githubreposProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	// Schema defines the provider-level schema for configuration data.
 	resp.Schema = schema.Schema{
+		Description: descriptions["provider_schema"],
 		Attributes: map[string]schema.Attribute{
 			"token": schema.StringAttribute{
 				Optional:    true,
